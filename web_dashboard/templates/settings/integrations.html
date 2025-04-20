@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Integrations - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Settings</h1>
+        <p class="lead">Configure your AI Executive Team</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Settings Menu</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('settings.index') }}" class="list-group-item list-group-item-action">General</a>
+                    <a href="{{ url_for('settings.integrations') }}" class="list-group-item list-group-item-action active">Integrations</a>
+                    <a href="{{ url_for('settings.security') }}" class="list-group-item list-group-item-action">Security</a>
+                    <a href="{{ url_for('settings.notifications') }}" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="{{ url_for('settings.llm_settings') }}" class="list-group-item list-group-item-action">LLM Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Slack Integration</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="slackEnabled" {% if integration_settings.slack.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="slackEnabled">Enabled</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="slackForm" action="{{ url_for('settings.save_integrations') }}" method="post">
+                    <input type="hidden" name="integration_type" value="slack">
+                    <input type="hidden" name="enabled" id="slackEnabledHidden" value="{% if integration_settings.slack.enabled %}on{% endif %}">
+
+                    <div class="mb-3">
+                        <label for="slackWebhookUrl" class="form-label">Webhook URL</label>
+                        <input type="text" class="form-control" id="slackWebhookUrl" name="webhook_url" value="{{ integration_settings.slack.webhook_url }}">
+                        <div class="form-text">You can get this from the Slack API website when creating a new app.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="slackChannel" class="form-label">Channel</label>
+                        <input type="text" class="form-control" id="slackChannel" name="channel" value="{{ integration_settings.slack.channel }}">
+                        <div class="form-text">The channel where messages will be sent (e.g., #ai-executive-team).</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="slackUsername" class="form-label">Bot Username</label>
+                        <input type="text" class="form-control" id="slackUsername" name="username" value="{{ integration_settings.slack.username }}">
+                        <div class="form-text">The name that will appear as the sender of messages.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Slack Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Telegram Integration</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="telegramEnabled" {% if integration_settings.telegram.enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="telegramEnabled">Enabled</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="telegramForm" action="{{ url_for('settings.save_integrations') }}" method="post">
+                    <input type="hidden" name="integration_type" value="telegram">
+                    <input type="hidden" name="enabled" id="telegramEnabledHidden" value="{% if integration_settings.telegram.enabled %}on{% endif %}">
+
+                    <div class="mb-3">
+                        <label for="telegramBotToken" class="form-label">Bot Token</label>
+                        <input type="text" class="form-control" id="telegramBotToken" name="bot_token" value="{{ integration_settings.telegram.bot_token }}">
+                        <div class="form-text">You can get this from the BotFather on Telegram.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telegramChatId" class="form-label">Chat ID</label>
+                        <input type="text" class="form-control" id="telegramChatId" name="chat_id" value="{{ integration_settings.telegram.chat_id }}">
+                        <div class="form-text">The chat ID where messages will be sent. You can get this by messaging your bot and checking the API.</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Why use Telegram?</h6>
+                        <p class="mb-0">Telegram is a free alternative to Slack that offers robust API capabilities for bot integration. It's a cost-effective solution for teams that need reliable messaging without subscription fees.</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Telegram Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Slack toggle
+        const slackEnabled = document.getElementById('slackEnabled');
+        const slackEnabledHidden = document.getElementById('slackEnabledHidden');
+
+        slackEnabled.addEventListener('change', function() {
+            slackEnabledHidden.value = this.checked ? 'on' : 'off';
+        });
+
+        // Handle Telegram toggle
+        const telegramEnabled = document.getElementById('telegramEnabled');
+        const telegramEnabledHidden = document.getElementById('telegramEnabledHidden');
+
+        telegramEnabled.addEventListener('change', function() {
+            telegramEnabledHidden.value = this.checked ? 'on' : 'off';
+        });
+    });
+</script>
+{% endblock %}

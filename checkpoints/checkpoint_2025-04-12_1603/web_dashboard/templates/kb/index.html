@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Base - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Knowledge Base</h1>
+        <p class="lead">Manage your AI Executive Team knowledge base</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Upload Document</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="documentFile" class="form-label">Document File</label>
+                        <input class="form-control" type="file" id="documentFile">
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentType" class="form-label">Document Type</label>
+                        <select class="form-select" id="documentType">
+                            <option selected>Company Information</option>
+                            <option>Product Information</option>
+                            <option>Technical Documentation</option>
+                            <option>Financial Information</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="documentDescription" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Knowledge Base Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Uploaded</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in documents %}
+                            <tr>
+                                <td>{{ document.name }}</td>
+                                <td>{{ document.type }}</td>
+                                <td>{{ document.uploaded }}</td>
+                                <td>{{ document.size }}</td>
+                                <td>
+                                    <a href="{{ url_for('kb.view_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-primary">View</a>
+                                    <a href="{{ url_for('kb.edit_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <button class="btn btn-sm btn-danger delete-doc" data-doc-id="{{ document.doc_id }}" data-doc-name="{{ document.name }}">Delete</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No documents found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle document deletion
+        const deleteButtons = document.querySelectorAll('.delete-doc');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const docId = this.getAttribute('data-doc-id');
+                const docName = this.getAttribute('data-doc-name');
+
+                if (confirm(`Are you sure you want to delete "${docName}"? This action cannot be undone.`)) {
+                    // In a real app, we would send a DELETE request to the server
+                    // For now, just show a success message and reload the page
+                    alert(`Document "${docName}" has been deleted.`);
+                    window.location.reload();
+                }
+            });
+        });
+
+        // Handle form submission
+        const uploadForm = document.querySelector('form');
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('documentFile');
+            const documentType = document.getElementById('documentType').value;
+            const documentDescription = document.getElementById('documentDescription').value;
+
+            if (fileInput.files.length === 0) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const fileName = fileInput.files[0].name;
+
+            // In a real app, we would upload the file to the server
+            // For now, just show a success message and reload the page
+            alert(`Document "${fileName}" has been uploaded successfully.`);
+            uploadForm.reset();
+        });
+    });
+</script>
+{% endblock %}

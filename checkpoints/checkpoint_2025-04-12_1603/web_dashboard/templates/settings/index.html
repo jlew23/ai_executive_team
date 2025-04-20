@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Settings</h1>
+        <p class="lead">Configure your AI Executive Team</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Settings Menu</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('settings.index') }}" class="list-group-item list-group-item-action active">General</a>
+                    <a href="{{ url_for('settings.integrations') }}" class="list-group-item list-group-item-action">Integrations</a>
+                    <a href="#" class="list-group-item list-group-item-action">Security</a>
+                    <a href="#" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="#" class="list-group-item list-group-item-action">Advanced</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">General Settings</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="systemName" class="form-label">System Name</label>
+                        <input type="text" class="form-control" id="systemName" value="AI Executive Team">
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminEmail" class="form-label">Admin Email</label>
+                        <input type="email" class="form-control" id="adminEmail" value="admin@aiexecutiveteam.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="timezone" class="form-label">Timezone</label>
+                        <select class="form-select" id="timezone">
+                            <option selected>UTC</option>
+                            <option>America/New_York</option>
+                            <option>America/Los_Angeles</option>
+                            <option>Europe/London</option>
+                            <option>Asia/Tokyo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="language" class="form-label">Default Language</label>
+                        <select class="form-select" id="language">
+                            <option selected>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                            <option>German</option>
+                            <option>Japanese</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enableAnalytics" checked>
+                        <label class="form-check-label" for="enableAnalytics">Enable Analytics</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enableLogging" checked>
+                        <label class="form-check-label" for="enableLogging">Enable Logging</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const systemName = document.getElementById('systemName').value;
+            const adminEmail = document.getElementById('adminEmail').value;
+            const timezone = document.getElementById('timezone').value;
+            const language = document.getElementById('language').value;
+            const enableAnalytics = document.getElementById('enableAnalytics').checked;
+            const enableLogging = document.getElementById('enableLogging').checked;
+            
+            // In a real app, we would send this data to the server
+            // For now, just show a success message
+            alert('Settings saved successfully!');
+        });
+    });
+</script>
+{% endblock %}

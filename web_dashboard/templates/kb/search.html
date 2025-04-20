@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Search Knowledge Base - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('kb.index') }}">Knowledge Base</a></li>
+                <li class="breadcrumb-item active">Search</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Search Knowledge Base</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('kb.search') }}">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="query" placeholder="Enter your search query..." value="{{ query }}" required>
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_results" class="form-label">Max Results</label>
+                                <input type="number" class="form-control" id="max_results" name="max_results" min="1" max="10" value="4">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="search_fuzziness" class="form-label">Search Type</label>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">Keyword</span>
+                                    <input type="range" class="form-range flex-grow-1" id="search_fuzziness" name="search_fuzziness" min="0" max="100" value="100">
+                                    <span class="ms-2">Semantic</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if query %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Search Results for "{{ query }}"</h5>
+                <span class="badge bg-primary">{{ results|length }} results</span>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                    {% for result in results %}
+                    <div class="search-result mb-4">
+                        <h5 class="mb-1">{{ result.source }}</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="text-muted small">
+                                {% if result.metadata and result.metadata.type %}
+                                <span class="badge bg-secondary me-2">{{ result.metadata.type }}</span>
+                                {% endif %}
+                                {% if result.metadata and result.metadata.uploaded %}
+                                <span>{{ result.metadata.uploaded }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-muted small">
+                                Score: {{ "%.2f"|format(result.score) }}
+                            </div>
+                        </div>
+                        <div class="search-content p-3 bg-light rounded">
+                            {{ result.content }}
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ url_for('kb.view_document', doc_id=result.doc_id) }}" class="btn btn-sm btn-outline-primary">View Source</a>
+                        </div>
+                    </div>
+                    {% if not loop.last %}<hr>{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        No results found for "{{ query }}". Try a different search term or adjust your search settings.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update the search type label based on the slider value
+        const searchFuzziness = document.getElementById('search_fuzziness');
+        const updateSearchTypeLabel = () => {
+            const value = searchFuzziness.value;
+            const keywordWeight = 100 - value;
+            const semanticWeight = value;
+            
+            // Update labels if needed
+            // You could add elements to show the exact percentages
+        };
+        
+        // Initial update
+        updateSearchTypeLabel();
+        
+        // Update on change
+        searchFuzziness.addEventListener('input', updateSearchTypeLabel);
+    });
+</script>
+{% endblock %}

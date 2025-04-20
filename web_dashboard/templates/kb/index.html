@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Base - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Knowledge Base</h1>
+        <p class="lead">Manage your AI Executive Team knowledge base</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Add to Knowledge Base</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="{{ url_for('kb.upload_document') }}" class="btn btn-primary">
+                        <i class="fas fa-file-upload me-2"></i> Upload Document
+                    </a>
+                    <a href="{{ url_for('kb.add_text') }}" class="btn btn-success">
+                        <i class="fas fa-font me-2"></i> Add Text Directly
+                    </a>
+                    <a href="{{ url_for('kb.add_url') }}" class="btn btn-info">
+                        <i class="fas fa-globe me-2"></i> Add from URL
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Search Knowledge Base</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('kb.search') }}" method="post">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="query" placeholder="Search..." required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3">
+                    <a href="{{ url_for('kb.search') }}" class="btn btn-outline-secondary btn-sm w-100">Advanced Search</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Knowledge Base Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Uploaded</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in documents %}
+                            <tr>
+                                <td>{{ document.name }}</td>
+                                <td>{{ document.type }}</td>
+                                <td>{{ document.uploaded }}</td>
+                                <td>{{ document.size }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('kb.view_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-primary">View</a>
+                                        <a href="{{ url_for('kb.edit_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <button class="btn btn-sm btn-danger delete-doc" data-doc-id="{{ document.doc_id }}" data-doc-name="{{ document.name }}">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No documents found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle document deletion
+        const deleteButtons = document.querySelectorAll('.delete-doc');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const docId = this.getAttribute('data-doc-id');
+                const docName = this.getAttribute('data-doc-name');
+
+                if (confirm(`Are you sure you want to delete "${docName}"? This action cannot be undone.`)) {
+                    deleteDoc(docId);
+                }
+            });
+        });
+
+        // Handle delete API call
+        const deleteDoc = async (docId) => {
+            try {
+                const response = await fetch('/api/knowledgebase/sources/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: docId })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the document.');
+            }
+        };
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Agents - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Agents</h1>
+        <p class="lead">Manage your AI Executive Team agents</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Agent Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Status</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agents %}
+                            <tr>
+                                <td>{{ agent.agent_name }}</td>
+                                <td>
+                                    {% if agent.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% elif agent.status == 'inactive' %}
+                                    <span class="badge bg-warning">Inactive</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Error</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ agent.last_active }}</td>
+                                <td>
+                                    <a href="{{ url_for('agents.detail', agent_id=agent.agent_id) }}" class="btn btn-sm btn-primary">View</a>
+                                    <button class="btn btn-sm btn-success">Start</button>
+                                    <button class="btn btn-sm btn-danger">Stop</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No agents found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

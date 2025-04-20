@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}LLM Settings - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Settings</h1>
+        <p class="lead">Configure your AI Executive Team</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Settings Menu</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('settings.index') }}" class="list-group-item list-group-item-action">General</a>
+                    <a href="{{ url_for('settings.integrations') }}" class="list-group-item list-group-item-action">Integrations</a>
+                    <a href="{{ url_for('settings.security') }}" class="list-group-item list-group-item-action">Security</a>
+                    <a href="{{ url_for('settings.notifications') }}" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="{{ url_for('settings.llm_settings') }}" class="list-group-item list-group-item-action active">LLM Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Language Model Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="llmSettingsForm">
+                    <h5>LLM Provider</h5>
+                    <div class="mb-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="llmProvider" id="providerOpenAI" value="openai" checked>
+                            <label class="form-check-label" for="providerOpenAI">OpenAI</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="llmProvider" id="providerLocal" value="local">
+                            <label class="form-check-label" for="providerLocal">Local LLM</label>
+                        </div>
+                    </div>
+
+                    <div id="openaiSettings">
+                        <h5>OpenAI Settings</h5>
+                        <div class="mb-3">
+                            <label for="openaiApiKey" class="form-label">API Key</label>
+                            <input type="text" class="form-control" id="openaiApiKey" value="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">
+                        </div>
+                        <div class="mb-3">
+                            <label for="openaiModel" class="form-label">Default Model</label>
+                            <select class="form-select" id="openaiModel">
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="localSettings" style="display: none;">
+                        <h5>Local LLM Settings</h5>
+                        <div class="mb-3">
+                            <label for="localApiUrl" class="form-label">API URL</label>
+                            <input type="text" class="form-control" id="localApiUrl" value="http://127.0.0.1:1234/v1">
+                            <div class="form-text">URL for your local LLM server (e.g., LM Studio)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="localModel" class="form-label">Default Model</label>
+                            <select class="form-select" id="localModel">
+                                {% for model in available_models %}
+                                <option value="{{ model.name }}" data-path="{{ model.path }}">{{ model.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Local Models Directory</h6>
+                            <p class="mb-0">Models are loaded from: <code>c:\Users\Luda\.lmstudio\models</code></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h5>Advanced Settings</h5>
+                    <div class="mb-3">
+                        <label for="temperature" class="form-label">Temperature: <span id="temperatureValue">0.7</span></label>
+                        <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                        <div class="form-text">Controls randomness: Lower values are more deterministic, higher values more creative.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxTokens" class="form-label">Max Tokens</label>
+                        <input type="number" class="form-control" id="maxTokens" value="2048" min="100" max="8192">
+                        <div class="form-text">Maximum number of tokens to generate in responses.</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="useKnowledgeBase" checked>
+                        <label class="form-check-label" for="useKnowledgeBase">Use Knowledge Base for Responses</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save LLM Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle LLM provider selection
+        const providerOpenAI = document.getElementById('providerOpenAI');
+        const providerLocal = document.getElementById('providerLocal');
+        const openaiSettings = document.getElementById('openaiSettings');
+        const localSettings = document.getElementById('localSettings');
+
+        providerOpenAI.addEventListener('change', function() {
+            if (this.checked) {
+                openaiSettings.style.display = 'block';
+                localSettings.style.display = 'none';
+            }
+        });
+
+        providerLocal.addEventListener('change', function() {
+            if (this.checked) {
+                openaiSettings.style.display = 'none';
+                localSettings.style.display = 'block';
+            }
+        });
+
+        // Handle temperature slider
+        const temperature = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperatureValue');
+
+        temperature.addEventListener('input', function() {
+            temperatureValue.textContent = this.value;
+        });
+
+        // Handle form submission
+        const form = document.getElementById('llmSettingsForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const llmProvider = document.querySelector('input[name="llmProvider"]:checked').value;
+            const openaiApiKey = document.getElementById('openaiApiKey').value;
+            const openaiModel = document.getElementById('openaiModel').value;
+            const localApiUrl = document.getElementById('localApiUrl').value;
+            const localModel = document.getElementById('localModel').value;
+            const temperature = document.getElementById('temperature').value;
+            const maxTokens = document.getElementById('maxTokens').value;
+            const useKnowledgeBase = document.getElementById('useKnowledgeBase').checked;
+
+            // Save settings to localStorage
+            const settings = {
+                llmProvider,
+                openaiApiKey,
+                openaiModel,
+                localApiUrl,
+                localModel,
+                temperature,
+                maxTokens,
+                useKnowledgeBase,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // If using local model, make sure to set the model name correctly
+            if (llmProvider === 'local') {
+                // Get the selected option
+                const localModelSelect = document.getElementById('localModel');
+                const selectedOption = localModelSelect.options[localModelSelect.selectedIndex];
+
+                // Get the model name and path
+                const modelName = selectedOption.value;
+                const modelPath = selectedOption.dataset.path || '';
+
+                // Update the settings
+                settings.localModel = modelName;
+                settings.localModelPath = modelPath;
+            }
+
+            localStorage.setItem('llmSettings', JSON.stringify(settings));
+
+            // Show success message
+            alert('LLM settings saved successfully! These settings will be used for all future chat sessions.');
+        });
+
+        // Load settings from localStorage on page load
+        const savedSettings = localStorage.getItem('llmSettings');
+        if (savedSettings) {
+            try {
+                const settings = JSON.parse(savedSettings);
+
+                // Set form values from saved settings
+                if (settings.llmProvider === 'local') {
+                    document.getElementById('providerLocal').checked = true;
+                    document.getElementById('openaiSettings').style.display = 'none';
+                    document.getElementById('localSettings').style.display = 'block';
+                } else {
+                    document.getElementById('providerOpenAI').checked = true;
+                }
+
+                document.getElementById('openaiApiKey').value = settings.openaiApiKey || '';
+
+                if (settings.openaiModel) {
+                    const openaiModelSelect = document.getElementById('openaiModel');
+                    for (let i = 0; i < openaiModelSelect.options.length; i++) {
+                        if (openaiModelSelect.options[i].value === settings.openaiModel) {
+                            openaiModelSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                document.getElementById('localApiUrl').value = settings.localApiUrl || 'http://127.0.0.1:1234/v1';
+
+                if (settings.localModel) {
+                    const localModelSelect = document.getElementById('localModel');
+                    for (let i = 0; i < localModelSelect.options.length; i++) {
+                        if (localModelSelect.options[i].value === settings.localModel) {
+                            localModelSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                document.getElementById('temperature').value = settings.temperature || 0.7;
+                document.getElementById('temperatureValue').textContent = settings.temperature || 0.7;
+                document.getElementById('maxTokens').value = settings.maxTokens || 2048;
+                document.getElementById('useKnowledgeBase').checked = settings.useKnowledgeBase !== false;
+            } catch (error) {
+                console.error('Error loading saved settings:', error);
+            }
+        }
+    });
+</script>
+{% endblock %}

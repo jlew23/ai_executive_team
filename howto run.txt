@@ -1,0 +1,27 @@
+# 1. Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 2. Install dependencies
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+
+# 3. Configure .env
+cp .env.example .env
+
+# 4. Run
+python main.py
+
+way #2 
+
+python simple_main.py
+
+conversational version with openai
+# 1. Install minimal dependencies
+pip install openai python-dotenv
+
+# 2. Create and configure .env file with OpenAI API key
+cp .env.example .env
+
+# 3. Run
+python conversational_main.py

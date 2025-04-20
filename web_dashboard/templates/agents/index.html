@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Agents - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Agents</h1>
+        <p class="lead">Manage your AI Executive Team agents</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Agent Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Status</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agents %}
+                            <tr>
+                                <td>{{ agent.agent_name }}</td>
+                                <td>
+                                    {% if agent.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% elif agent.status == 'inactive' %}
+                                    <span class="badge bg-warning">Inactive</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Error</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ agent.last_active }}</td>
+                                <td>
+                                    <a href="{{ url_for('agents.detail', agent_id=agent.agent_id) }}" class="btn btn-sm btn-primary">View</a>
+                                    <button class="btn btn-sm btn-success start-agent" data-agent-id="{{ agent.agent_id }}">Start</button>
+                                    <button class="btn btn-sm btn-danger stop-agent" data-agent-id="{{ agent.agent_id }}">Stop</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No agents found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Start Agent buttons
+        const startButtons = document.querySelectorAll('.start-agent');
+        startButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const agentId = this.getAttribute('data-agent-id');
+                updateAgentStatus(agentId, 'active');
+            });
+        });
+
+        // Handle Stop Agent buttons
+        const stopButtons = document.querySelectorAll('.stop-agent');
+        stopButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const agentId = this.getAttribute('data-agent-id');
+                updateAgentStatus(agentId, 'inactive');
+            });
+        });
+
+        // Function to update agent status
+        async function updateAgentStatus(agentId, status) {
+            try {
+                const response = await fetch('/agents/api/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agent_id: parseInt(agentId),
+                        status: status
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status_code === 'success') {
+                    // Update the status badge in the table
+                    const row = document.querySelector(`button[data-agent-id="${agentId}"]`).closest('tr');
+                    const statusBadge = row.querySelector('.badge');
+
+                    statusBadge.className = 'badge';
+                    if (status === 'active') {
+                        statusBadge.classList.add('bg-success');
+                        statusBadge.textContent = 'Active';
+                    } else if (status === 'inactive') {
+                        statusBadge.classList.add('bg-warning');
+                        statusBadge.textContent = 'Inactive';
+                    } else {
+                        statusBadge.classList.add('bg-danger');
+                        statusBadge.textContent = 'Error';
+                    }
+
+                    // Update the last active time
+                    const lastActiveCell = row.querySelectorAll('td')[2];
+                    lastActiveCell.textContent = data.last_active;
+
+                    // Show success message
+                    alert(data.message);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the agent status.');
+            }
+        }
+    });
+</script>
+{% endblock %}

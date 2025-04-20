@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ document.name }} - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('kb.index') }}">Knowledge Base</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('kb.view_document', doc_id=document.doc_id) }}">{{ document.name }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Edit Document</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Document Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ document.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Document Type</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="Company Information" {% if document.type == 'Company Information' %}selected{% endif %}>Company Information</option>
+                            <option value="Product Information" {% if document.type == 'Product Information' %}selected{% endif %}>Product Information</option>
+                            <option value="Technical Documentation" {% if document.type == 'Technical Documentation' %}selected{% endif %}>Technical Documentation</option>
+                            <option value="Financial Information" {% if document.type == 'Financial Information' %}selected{% endif %}>Financial Information</option>
+                            <option value="Other" {% if document.type == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content (Markdown)</label>
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Edit in Markdown format. Preview will update as you type.</small>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="showPreview" checked>
+                                <label class="form-check-label" for="showPreview">Show Preview</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 editor-container">
+                                <textarea class="form-control" id="content" name="content" rows="20" required>{{ document.content }}</textarea>
+                            </div>
+                            <div class="col-md-6 preview-container">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Preview</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="preview" class="markdown-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('kb.view_document', doc_id=document.doc_id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentTextarea = document.getElementById('content');
+        const previewDiv = document.getElementById('preview');
+        const showPreviewCheckbox = document.getElementById('showPreview');
+        const previewContainer = document.querySelector('.preview-container');
+        const editorContainer = document.querySelector('.editor-container');
+        
+        // Function to update preview
+        function updatePreview() {
+            const content = contentTextarea.value;
+            previewDiv.innerHTML = marked.parse(content);
+        }
+        
+        // Initial preview
+        updatePreview();
+        
+        // Update preview on input
+        contentTextarea.addEventListener('input', updatePreview);
+        
+        // Toggle preview
+        showPreviewCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                previewContainer.style.display = 'block';
+                editorContainer.classList.remove('col-md-12');
+                editorContainer.classList.add('col-md-6');
+            } else {
+                previewContainer.style.display = 'none';
+                editorContainer.classList.remove('col-md-6');
+                editorContainer.classList.add('col-md-12');
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .markdown-content {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+    .markdown-content h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .markdown-content h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .markdown-content h3 {
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .markdown-content p {
+        margin-bottom: 1rem;
+    }
+    .markdown-content ul, .markdown-content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    .markdown-content li {
+        margin-bottom: 0.25rem;
+    }
+    .markdown-content code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+    .markdown-content pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+    }
+    #content {
+        font-family: monospace;
+        resize: vertical;
+    }
+</style>
+{% endblock %}

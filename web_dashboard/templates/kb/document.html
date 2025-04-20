@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document.name }} - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('kb.index') }}">Knowledge Base</a></li>
+                <li class="breadcrumb-item active">{{ document.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ document.name }}</h5>
+                <div>
+                    <a href="{{ url_for('kb.edit_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ url_for('kb.index') }}" class="btn btn-sm btn-secondary">Back</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <strong>Type:</strong> {{ document.type }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Uploaded:</strong> {{ document.uploaded }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Size:</strong> {{ document.size }}
+                    </div>
+                </div>
+                <div class="document-content">
+                    <div class="markdown-content">
+                        {{ document.content | safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Convert markdown to HTML
+        const markdownContent = document.querySelector('.markdown-content');
+        if (markdownContent) {
+            const content = markdownContent.textContent.trim();
+            markdownContent.innerHTML = marked.parse(content);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .markdown-content {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+    .markdown-content h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .markdown-content h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .markdown-content h3 {
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .markdown-content p {
+        margin-bottom: 1rem;
+    }
+    .markdown-content ul, .markdown-content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    .markdown-content li {
+        margin-bottom: 0.25rem;
+    }
+    .markdown-content code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+    .markdown-content pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}

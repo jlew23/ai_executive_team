@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Analytics</h1>
+        <p class="lead">AI Executive Team performance analytics</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Conversations</h5>
+                <div class="display-4 fw-bold">125</div>
+                <div class="text-muted">Last 30 days</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Messages</h5>
+                <div class="display-4 fw-bold">1,432</div>
+                <div class="text-muted">Last 30 days</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Avg. Response Time</h5>
+                <div class="display-4 fw-bold">1.2s</div>
+                <div class="text-muted">Last 30 days</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Knowledge Base Queries</h5>
+                <div class="display-4 fw-bold">543</div>
+                <div class="text-muted">Last 30 days</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Conversations by Agent</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="agentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Daily Conversations</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Top Queries</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Query</th>
+                                <th>Count</th>
+                                <th>Avg. Response Time</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>What products does our company offer?</td>
+                                <td>42</td>
+                                <td>1.1s</td>
+                                <td>98%</td>
+                            </tr>
+                            <tr>
+                                <td>Tell me about our company's revenue</td>
+                                <td>35</td>
+                                <td>1.3s</td>
+                                <td>95%</td>
+                            </tr>
+                            <tr>
+                                <td>How many employees do we have?</td>
+                                <td>28</td>
+                                <td>0.9s</td>
+                                <td>100%</td>
+                            </tr>
+                            <tr>
+                                <td>What is our company's mission?</td>
+                                <td>25</td>
+                                <td>1.0s</td>
+                                <td>97%</td>
+                            </tr>
+                            <tr>
+                                <td>Who are our main competitors?</td>
+                                <td>22</td>
+                                <td>1.5s</td>
+                                <td>92%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agent chart
+        var agentCtx = document.getElementById('agentChart').getContext('2d');
+        var agentChart = new Chart(agentCtx, {
+            type: 'pie',
+            data: {
+                labels: ['CEO', 'CTO', 'CFO', 'CMO', 'COO'],
+                datasets: [{
+                    data: [35, 25, 15, 20, 5],
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#6610f2',
+                        '#6f42c1',
+                        '#d63384',
+                        '#dc3545'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Daily chart
+        var dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        var dailyChart = new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: ['Apr 5', 'Apr 6', 'Apr 7', 'Apr 8', 'Apr 9', 'Apr 10', 'Apr 11', 'Apr 12'],
+                datasets: [{
+                    label: 'Conversations',
+                    data: [12, 15, 18, 14, 20, 17, 16, 13],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

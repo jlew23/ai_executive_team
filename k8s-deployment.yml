@@ -1,0 +1,564 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-executive-team
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-executive-team-config
+  namespace: ai-executive-team
+data:
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://ai-executive-team.example.com"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_DATABASE: "ai_executive_team"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-executive-team-secrets
+  namespace: ai-executive-team
+type: Opaque
+data:
+  # These are placeholders - replace with actual base64 encoded values
+  DB_USERNAME: YWRtaW4=  # admin
+  DB_PASSWORD: cGFzc3dvcmQ=  # password
+  REDIS_PASSWORD: cGFzc3dvcmQ=  # password
+  SECRET_KEY: c2VjcmV0LWtleQ==  # secret-key
+  JWT_SECRET: and0LXNlY3JldA==  # jwt-secret
+  OPENAI_API_KEY: b3BlbmFpLWFwaS1rZXk=  # openai-api-key
+  SLACK_BOT_TOKEN: c2xhY2stYm90LXRva2Vu  # slack-bot-token
+  SLACK_SIGNING_SECRET: c2xhY2stc2lnbmluZy1zZWNyZXQ=  # slack-signing-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-executive-team-app
+  namespace: ai-executive-team
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-executive-team
+      component: app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ai-executive-team
+        component: app
+    spec:
+      containers:
+      - name: app
+        image: ${REGISTRY_URL}/ai-executive-team:${IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: ai-executive-team-config
+        - secretRef:
+            name: ai-executive-team-secrets
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - name: brain-data
+          mountPath: /app/brain_data
+        - name: app-data
+          mountPath: /app/data
+        - name: logs
+          mountPath: /app/logs
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+      volumes:
+      - name: brain-data
+        persistentVolumeClaim:
+          claimName: brain-data-pvc
+      - name: app-data
+        persistentVolumeClaim:
+          claimName: app-data-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-executive-team-web
+  namespace: ai-executive-team
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-executive-team
+      component: web
+  template:
+    metadata:
+      labels:
+        app: ai-executive-team
+        component: web
+    spec:
+      containers:
+      - name: web
+        image: ${REGISTRY_URL}/ai-executive-team-web:${IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: ai-executive-team-config
+        - secretRef:
+            name: ai-executive-team-secrets
+        env:
+        - name: API_URL
+          value: "http://ai-executive-team-app:8000"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-executive-team-worker
+  namespace: ai-executive-team
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-executive-team
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: ai-executive-team
+        component: worker
+    spec:
+      containers:
+      - name: worker
+        image: ${REGISTRY_URL}/ai-executive-team:${IMAGE_TAG}
+        imagePullPolicy: Always
+        command: ["python", "-m", "scripts.run_worker"]
+        envFrom:
+        - configMapRef:
+            name: ai-executive-team-config
+        - secretRef:
+            name: ai-executive-team-secrets
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - name: brain-data
+          mountPath: /app/brain_data
+        - name: app-data
+          mountPath: /app/data
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: brain-data
+        persistentVolumeClaim:
+          claimName: brain-data-pvc
+      - name: app-data
+        persistentVolumeClaim:
+          claimName: app-data-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs-pvc
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: ai-executive-team
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-executive-team
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: ai-executive-team
+        component: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: ai-executive-team-secrets
+              key: DB_USERNAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ai-executive-team-secrets
+              key: DB_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: ai-executive-team-config
+              key: DB_DATABASE
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: ai-executive-team
+spec:
+  serviceName: redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-executive-team
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: ai-executive-team
+        component: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6-alpine
+        command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+        ports:
+        - containerPort: 6379
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ai-executive-team-secrets
+              key: REDIS_PASSWORD
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-executive-team-app
+  namespace: ai-executive-team
+spec:
+  selector:
+    app: ai-executive-team
+    component: app
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-executive-team-web
+  namespace: ai-executive-team
+spec:
+  selector:
+    app: ai-executive-team
+    component: web
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: ai-executive-team
+spec:
+  selector:
+    app: ai-executive-team
+    component: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: ai-executive-team
+spec:
+  selector:
+    app: ai-executive-team
+    component: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  clusterIP: None
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-executive-team-ingress
+  namespace: ai-executive-team
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+  - hosts:
+    - ai-executive-team.example.com
+    - dashboard.ai-executive-team.example.com
+    secretName: ai-executive-team-tls
+  rules:
+  - host: ai-executive-team.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-executive-team-app
+            port:
+              number: 8000
+  - host: dashboard.ai-executive-team.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-executive-team-web
+            port:
+              number: 3000
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brain-data-pvc
+  namespace: ai-executive-team
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-data-pvc
+  namespace: ai-executive-team
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-pvc
+  namespace: ai-executive-team
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ai-executive-team-backup
+  namespace: ai-executive-team
+spec:
+  schedule: "0 2 * * *"  # Run at 2 AM every day
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: postgres:13-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              TIMESTAMP=$(date +%Y%m%d%H%M%S)
+              pg_dump -h postgres -U $DB_USERNAME -d $DB_DATABASE -f /backups/db_backup_$TIMESTAMP.sql
+              tar -czf /backups/brain_data_$TIMESTAMP.tar.gz -C /brain_data .
+              tar -czf /backups/app_data_$TIMESTAMP.tar.gz -C /app_data .
+              find /backups -name "db_backup_*" -type f -mtime +7 -delete
+              find /backups -name "brain_data_*" -type f -mtime +7 -delete
+              find /backups -name "app_data_*" -type f -mtime +7 -delete
+            env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ai-executive-team-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-executive-team-secrets
+                  key: DB_PASSWORD
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: ai-executive-team-config
+                  key: DB_DATABASE
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-executive-team-secrets
+                  key: DB_PASSWORD
+            volumeMounts:
+            - name: backups
+              mountPath: /backups
+            - name: brain-data
+              mountPath: /brain_data
+            - name: app-data
+              mountPath: /app_data
+          restartPolicy: OnFailure
+          volumes:
+          - name: backups
+            persistentVolumeClaim:
+              claimName: backups-pvc
+          - name: brain-data
+            persistentVolumeClaim:
+              claimName: brain-data-pvc
+          - name: app-data
+            persistentVolumeClaim:
+              claimName: app-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backups-pvc
+  namespace: ai-executive-team
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-executive-team
+  namespace: ai-executive-team
+spec:
+  selector:
+    matchLabels:
+      app: ai-executive-team
+  endpoints:
+  - port: 8000
+    path: /metrics
+    interval: 15s
+  - port: 3000
+    path: /metrics
+    interval: 15s

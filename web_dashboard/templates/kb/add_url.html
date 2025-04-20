@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Add URL - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('kb.index') }}">Knowledge Base</a></li>
+                <li class="breadcrumb-item active">Add URL</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Add Web Content to Knowledge Base</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL</label>
+                        <input type="url" class="form-control" id="url" name="url" placeholder="https://example.com/page" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Processing Information</h6>
+                        <p>
+                            The system will extract the main content from the provided URL, removing navigation, headers, footers, and other non-content elements.
+                        </p>
+                        <p class="mb-0">
+                            For best results, provide URLs that contain primarily text content. Pages with complex layouts or heavy JavaScript may not be processed correctly.
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('kb.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Add to Knowledge Base</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}{{ agent.agent_name }} - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>{{ agent.agent_name }}</h1>
+        <p class="lead">Agent Details</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Agent Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Status:</div>
+                    <div>
+                        {% if agent.status == 'active' %}
+                        <span class="badge bg-success">Active</span>
+                        {% elif agent.status == 'inactive' %}
+                        <span class="badge bg-warning">Inactive</span>
+                        {% else %}
+                        <span class="badge bg-danger">Error</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Last Active:</div>
+                    <div><strong>{{ agent.last_active }}</strong></div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Agent ID:</div>
+                    <div><strong>{{ agent.agent_id }}</strong></div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success btn-sm" id="startAgent">Start Agent</button>
+                    <button class="btn btn-danger btn-sm" id="stopAgent">Stop Agent</button>
+                    <button class="btn btn-warning btn-sm" id="restartAgent">Restart Agent</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ agent.last_active }}</td>
+                                <td>Message Processed</td>
+                                <td>Responded to user query about company products</td>
+                            </tr>
+                            <tr>
+                                <td>2025-04-12 13:30:00</td>
+                                <td>Knowledge Base Query</td>
+                                <td>Searched for information about "AI products"</td>
+                            </tr>
+                            <tr>
+                                <td>2025-04-12 12:45:00</td>
+                                <td>Status Change</td>
+                                <td>Agent status changed to {{ agent.status }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Agent Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="agentName" class="form-label">Agent Name</label>
+                        <input type="text" class="form-control" id="agentName" value="{{ agent.agent_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="agentRole" class="form-label">Agent Role</label>
+                        <input type="text" class="form-control" id="agentRole" value="Executive">
+                    </div>
+                    <div class="mb-3">
+                        <label for="agentDescription" class="form-label">Agent Description</label>
+                        <textarea class="form-control" id="agentDescription" rows="3">{{ agent.agent_name }} is an AI executive team member responsible for key business decisions.</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="agentModel" class="form-label">LLM Model</label>
+                        <select class="form-select" id="agentModel">
+                            {% for model in available_models %}
+                            <option value="{{ model.path }}" {% if model.name == 'claude-3-sonnet' %}selected{% endif %}>{{ model.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="useLocalModel">
+                            <label class="form-check-label" for="useLocalModel">Use Local Model</label>
+                        </div>
+                        <small class="text-muted">When enabled, the agent will use local models from LM Studio instead of cloud models.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle local model toggle
+        const useLocalModelSwitch = document.getElementById('useLocalModel');
+        const modelSelect = document.getElementById('agentModel');
+        const agentId = {{ agent.agent_id }};
+        const statusBadge = document.querySelector('.badge');
+
+        // Agent control buttons
+        const startAgentBtn = document.getElementById('startAgent');
+        const stopAgentBtn = document.getElementById('stopAgent');
+        const restartAgentBtn = document.getElementById('restartAgent');
+
+        // Function to filter models based on toggle state
+        function filterModels(useLocal) {
+            const options = Array.from(modelSelect.options);
+
+            options.forEach(option => {
+                const isCloudModel = option.value === 'cloud';
+                const isLocalModel = option.value !== 'cloud';
+
+                // If using local models, hide cloud models
+                if (useLocal && isCloudModel) {
+                    option.style.display = 'none';
+                    // If this was selected, select the first visible option
+                    if (option.selected && options.some(o => o.value !== 'cloud')) {
+                        const firstLocalOption = options.find(o => o.value !== 'cloud');
+                        if (firstLocalOption) firstLocalOption.selected = true;
+                    }
+                }
+                // If using cloud models, hide local models
+                else if (!useLocal && isLocalModel) {
+                    option.style.display = 'none';
+                    // If this was selected, select the first cloud option
+                    if (option.selected && options.some(o => o.value === 'cloud')) {
+                        const firstCloudOption = options.find(o => o.value === 'cloud');
+                        if (firstCloudOption) firstCloudOption.selected = true;
+                    }
+                }
+                else {
+                    option.style.display = '';
+                }
+            });
+        }
+
+        // Function to update agent status
+        async function updateAgentStatus(status) {
+            try {
+                const response = await fetch('/agents/api/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agent_id: agentId,
+                        status: status
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status_code === 'success') {
+                    // Update the status badge
+                    statusBadge.className = 'badge';
+                    if (status === 'active') {
+                        statusBadge.classList.add('bg-success');
+                        statusBadge.textContent = 'Active';
+                    } else if (status === 'inactive') {
+                        statusBadge.classList.add('bg-warning');
+                        statusBadge.textContent = 'Inactive';
+                    } else {
+                        statusBadge.classList.add('bg-danger');
+                        statusBadge.textContent = 'Error';
+                    }
+
+                    // Show success message
+                    alert(data.message);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the agent status.');
+            }
+        }
+
+        // Initial filter
+        filterModels(useLocalModelSwitch.checked);
+
+        // Handle toggle changes
+        useLocalModelSwitch.addEventListener('change', function() {
+            filterModels(this.checked);
+        });
+
+        // Handle agent control buttons
+        startAgentBtn.addEventListener('click', function() {
+            updateAgentStatus('active');
+        });
+
+        stopAgentBtn.addEventListener('click', function() {
+            updateAgentStatus('inactive');
+        });
+
+        restartAgentBtn.addEventListener('click', function() {
+            // First stop, then start
+            updateAgentStatus('inactive').then(() => {
+                setTimeout(() => {
+                    updateAgentStatus('active');
+                }, 1000);
+            });
+        });
+
+        // Form submission handler
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const agentName = document.getElementById('agentName').value;
+            const agentRole = document.getElementById('agentRole').value;
+            const agentDescription = document.getElementById('agentDescription').value;
+            const selectedModel = modelSelect.options[modelSelect.selectedIndex].text;
+            const useLocalModel = useLocalModelSwitch.checked;
+
+            // Show success message
+            alert(`Agent configuration saved!\n\nName: ${agentName}\nRole: ${agentRole}\nModel: ${selectedModel}\nUse Local Model: ${useLocalModel ? 'Yes' : 'No'}`);
+
+            // In a real app, you would send this data to the server
+        });
+    });
+</script>
+{% endblock %}

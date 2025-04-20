@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Notification Settings - AI Executive Team{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Settings</h1>
+        <p class="lead">Configure your AI Executive Team</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Settings Menu</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('settings.index') }}" class="list-group-item list-group-item-action">General</a>
+                    <a href="{{ url_for('settings.integrations') }}" class="list-group-item list-group-item-action">Integrations</a>
+                    <a href="{{ url_for('settings.security') }}" class="list-group-item list-group-item-action">Security</a>
+                    <a href="{{ url_for('settings.notifications') }}" class="list-group-item list-group-item-action active">Notifications</a>
+                    <a href="{{ url_for('settings.llm_settings') }}" class="list-group-item list-group-item-action">LLM Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Notification Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="notificationsForm">
+                    <h5>Email Notifications</h5>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="emailAgentStatus" checked>
+                        <label class="form-check-label" for="emailAgentStatus">Agent Status Changes</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="emailSystemAlerts" checked>
+                        <label class="form-check-label" for="emailSystemAlerts">System Alerts</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="emailWeeklyReports" checked>
+                        <label class="form-check-label" for="emailWeeklyReports">Weekly Reports</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="emailNewMessages">
+                        <label class="form-check-label" for="emailNewMessages">New Messages</label>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>In-App Notifications</h5>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="inAppAgentStatus" checked>
+                        <label class="form-check-label" for="inAppAgentStatus">Agent Status Changes</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="inAppSystemAlerts" checked>
+                        <label class="form-check-label" for="inAppSystemAlerts">System Alerts</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="inAppNewMessages" checked>
+                        <label class="form-check-label" for="inAppNewMessages">New Messages</label>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Notification Schedule</h5>
+                    <div class="mb-3">
+                        <label for="notificationStartTime" class="form-label">Do Not Disturb Start Time</label>
+                        <input type="time" class="form-control" id="notificationStartTime" value="22:00">
+                    </div>
+                    <div class="mb-3">
+                        <label for="notificationEndTime" class="form-label">Do Not Disturb End Time</label>
+                        <input type="time" class="form-control" id="notificationEndTime" value="07:00">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enableDND">
+                        <label class="form-check-label" for="enableDND">Enable Do Not Disturb</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Notification Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle form submission
+        const form = document.getElementById('notificationsForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const emailAgentStatus = document.getElementById('emailAgentStatus').checked;
+            const emailSystemAlerts = document.getElementById('emailSystemAlerts').checked;
+            const emailWeeklyReports = document.getElementById('emailWeeklyReports').checked;
+            const emailNewMessages = document.getElementById('emailNewMessages').checked;
+            
+            const inAppAgentStatus = document.getElementById('inAppAgentStatus').checked;
+            const inAppSystemAlerts = document.getElementById('inAppSystemAlerts').checked;
+            const inAppNewMessages = document.getElementById('inAppNewMessages').checked;
+            
+            const notificationStartTime = document.getElementById('notificationStartTime').value;
+            const notificationEndTime = document.getElementById('notificationEndTime').value;
+            const enableDND = document.getElementById('enableDND').checked;
+            
+            // In a real app, we would send this data to the server
+            // For now, just show a success message
+            alert('Notification settings saved successfully!');
+        });
+    });
+</script>
+{% endblock %}
