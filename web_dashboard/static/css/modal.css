@@ -1,0 +1,34 @@
+/* Modal styles for dark theme */
+.modal-content {
+    background-color: #0f1117;
+    color: #e0e0e0;
+    border: 1px solid #23262f;
+}
+
+.modal-header {
+    border-bottom: 1px solid #363a45;
+    background-color: #181a20;
+}
+
+.modal-footer {
+    border-top: 1px solid #363a45;
+    background-color: #181a20;
+}
+
+.modal-body {
+    background-color: #0f1117;
+}
+
+.modal-title {
+    color: #e0e0e0;
+}
+
+.btn-close {
+    color: #e0e0e0;
+    opacity: 0.8;
+}
+
+.btn-close:hover {
+    color: #e0e0e0;
+    opacity: 1;
+}

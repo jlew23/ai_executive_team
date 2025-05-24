@@ -1,9 +1,9 @@
 python-dotenv==1.0.0
 slack-bolt==1.18.0
-langchain==0.0.292
+langchain
 chromadb==0.4.18
 sentence-transformers==2.2.2
-rasa==1.10.2
+rasa
 # activepieces-sdk==0.1.0 - Not available, commented out
 pydantic==2.3.0
 numpy==1.24.3
