@@ -41,10 +41,12 @@ class KnowledgeBaseTool:
             List of documents matching the query
         """
         try:
-            results = self.knowledge_base.query(
-                query_text=query,
-                k=max_results,
-                search_fuzziness=search_fuzziness
+            # Use the search method instead of query
+            results = self.knowledge_base.search(
+                query=query,
+                limit=max_results,
+                semantic_weight=search_fuzziness/100,  # Convert to 0-1 range
+                keyword_weight=(100-search_fuzziness)/100  # Inverse of semantic weight
             )
             
             return results
@@ -68,8 +70,32 @@ class KnowledgeBaseTool:
         formatted = "Knowledge Base Search Results:\n\n"
         
         for i, result in enumerate(results):
-            formatted += f"Result {i+1} (Score: {result['score']:.2f}):\n"
-            formatted += f"{result['content']}\n"
-            formatted += f"Source: {result['metadata']['source_name']}\n\n"
+            # Handle different result structures
+            # Extract score if available
+            score = result.get('score', 0)
+            
+            # Extract content from various possible fields
+            text = ""
+            if 'text' in result:
+                text = result['text']
+            elif 'content' in result:
+                text = result['content']
+            elif 'page_content' in result:
+                text = result['page_content']
+            else:
+                # If no content field is found, use a placeholder
+                text = "[Content not available in this format]"
+            
+            # Get metadata safely
+            metadata = result.get('metadata', {})
+            source_name = metadata.get('source_name', metadata.get('name', 'Unknown'))
+            source_type = metadata.get('type', 'Document')
+            uploaded_at = metadata.get('uploaded_at', metadata.get('uploaded', 'Unknown date'))
+            
+            # Format the result with more detailed information
+            formatted += f"Result {i+1} (Relevance: {score:.2f}):\n"
+            formatted += f"{text}\n\n"
+            formatted += f"Source: {source_name} ({source_type})\n"
+            formatted += f"Added: {uploaded_at}\n\n"
         
         return formatted

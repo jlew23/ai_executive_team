@@ -1,0 +1,117 @@
+/* Table visibility fixes */
+.table th, .table td {
+    color: #e0e0e0 !important;
+}
+
+.table-dark th, .table-dark td, 
+.table-dark thead th, 
+.table-dark tbody + tbody {
+    border-color: #363a45;
+    color: #e0e0e0 !important;
+}
+
+/* Fix for text-muted class */
+.text-muted {
+    color: #8f9bb3 !important;
+}
+
+/* Fix for list group items in chat */
+.list-group-item {
+    background-color: #181a20;
+    color: #e0e0e0;
+    border-color: #363a45;
+}
+
+.list-group-item.active {
+    background-color: #36e37a;
+    color: #0f1117;
+    border-color: #36e37a;
+}
+
+.list-group-item-action:hover {
+    background-color: #23262f;
+    color: #e0e0e0;
+}
+
+/* Fix for form check inputs */
+.form-check-input {
+    background-color: #181a20;
+    border-color: #363a45;
+}
+
+.form-check-input:checked {
+    background-color: #36e37a;
+    border-color: #36e37a;
+}
+
+/* Fix for badges */
+.badge {
+    color: #e0e0e0;
+}
+
+.badge.bg-success {
+    background-color: #36e37a !important;
+    color: #0f1117;
+}
+
+.badge.bg-warning {
+    background-color: #f1c40f !important;
+    color: #0f1117;
+}
+
+.badge.bg-danger {
+    background-color: #e74c3c !important;
+    color: #e0e0e0;
+}
+
+.badge.bg-info {
+    background-color: #3498db !important;
+    color: #0f1117;
+}
+
+.badge.bg-primary {
+    background-color: #36e37a !important;
+    color: #0f1117;
+}
+
+/* Fix for system message in chat */
+.system-message .message-content {
+    background-color: #23262f !important;
+    color: #8f9bb3 !important;
+    border: 1px solid #363a45 !important;
+}
+
+/* Fix for agent message in chat */
+.agent-message .message-content {
+    background-color: #23262f !important;
+    color: #e0e0e0 !important;
+}
+
+/* Fix for user message in chat */
+.user-message .message-content {
+    background-color: #36e37a !important;
+    color: #0f1117 !important;
+}
+
+/* Fix for outline buttons */
+.btn-outline-primary {
+    color: #36e37a;
+    border-color: #36e37a;
+}
+
+.btn-outline-primary:hover {
+    background-color: #36e37a;
+    color: #0f1117;
+    border-color: #36e37a;
+}
+
+.btn-outline-danger {
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.btn-outline-danger:hover {
+    background-color: #e74c3c;
+    color: #e0e0e0;
+    border-color: #e74c3c;
+}

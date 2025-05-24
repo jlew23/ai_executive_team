@@ -21,7 +21,29 @@
                 <h5 class="card-title mb-0">{{ document.name }}</h5>
                 <div>
                     <a href="{{ url_for('kb.edit_document', doc_id=document.doc_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
                     <a href="{{ url_for('kb.index') }}" class="btn btn-sm btn-secondary">Back</a>
+                </div>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete "{{ document.name }}"? This action cannot be undone.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('kb.delete_document', doc_id=document.doc_id) }}" method="POST">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -37,9 +59,30 @@
                     </div>
                 </div>
                 <div class="document-content">
-                    <div class="markdown-content">
-                        {{ document.content | safe }}
-                    </div>
+                    {% if document.type == 'PDF' %}
+                        {% if document.content and document.content != 'Content not available in mock mode' %}
+                            <div class="pdf-content">
+                                <h4>PDF Content:</h4>
+                                <div class="markdown-content">
+                                    {{ document.content | safe }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <p>PDF content preview is not available. This could be due to:</p>
+                                <ul>
+                                    <li>The PDF contains scanned images rather than text</li>
+                                    <li>The PDF has security restrictions</li>
+                                    <li>The PDF text extraction failed</li>
+                                </ul>
+                                <p>You can still use this document in the knowledge base for searches.</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="markdown-content">
+                            {{ document.content | safe }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

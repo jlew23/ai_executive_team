@@ -116,21 +116,32 @@
         // Handle delete API call
         const deleteDoc = async (docId) => {
             try {
-                const response = await fetch('/api/knowledgebase/sources/delete', {
+                // Use the document route for deletion instead of the API route
+                const response = await fetch(`/kb/document/${docId}/delete`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id: docId })
+                    }
                 });
 
-                const data = await response.json();
+                // Check if the response is a redirect (success)
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
 
-                if (data.status === 'success') {
-                    alert(data.message);
+                // Try to parse JSON response if not redirected
+                try {
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(`Error: ${data.error || 'Unknown error'}`);
+                    }
+                } catch (jsonError) {
+                    // If not JSON, reload the page anyway
                     window.location.reload();
-                } else {
-                    alert(`Error: ${data.error}`);
                 }
             } catch (error) {
                 console.error('Error:', error);

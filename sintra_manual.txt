@@ -1,0 +1,177 @@
+# SINTRA AI EXECUTIVE TEAM - SYSTEM MANUAL
+
+## Overview
+The AI Executive Team is a multi-agent system designed to simulate an executive team for a company. It consists of specialized agents (CEO, CTO, CFO, CMO, COO) that can interact with users through a web dashboard, access a knowledge base, and delegate tasks among themselves.
+
+## Project Structure
+
+### Root Directory
+- `run_dashboard.py`: Main entry point for the web dashboard application. Contains Flask routes and initializes the mock agents.
+- `run_api.py`: API server for external integrations.
+- `knowledge_base.py`: Implementation of the vector knowledge base using Supabase.
+- `supabase_config.py`: Configuration for Supabase connection.
+- `main.py`: Alternative entry point with Slack integration.
+- `conversational_main.py`: Entry point for the conversational interface.
+- `simple_main.py`: Simplified entry point for testing.
+- `demo_kb_agent.py`: Demo agent that uses the knowledge base.
+- `fix_kb_documents.py` and `kb_document_fixes.py`: Utilities for fixing knowledge base documents.
+
+### Agents Directory
+The `agents/` directory contains the implementation of the AI executive team agents:
+
+- `base_agent.py`: Base class for all agents with common functionality.
+- `director_agent.py`: CEO agent that orchestrates the team and delegates tasks.
+- `technical_support_agent.py`: CTO agent for technical questions.
+- `finance_agent.py`: CFO agent for financial questions.
+- `marketing_agent.py`: CMO agent for marketing questions.
+- `customer_service_agent.py`: COO agent for operational questions.
+- `sales_agent.py`: Sales agent for sales-related questions.
+- `knowledge_base_tool.py`: Tool for agents to interact with the knowledge base.
+
+### Agent Communication
+The `agent_communication/` directory contains the implementation of the agent communication system:
+
+- `delegation_system.py`: System for delegating tasks between agents.
+- `message_bus.py`: Message bus for agent communication.
+- `task_manager.py`: Task manager for tracking delegated tasks.
+- `message.py`: Message classes for agent communication.
+
+### Agent Tools
+The `agent_tools/` directory contains tools that agents can use to perform tasks:
+
+- Various tool implementations for agents to interact with external systems.
+
+### AI Integrations
+The `ai_integrations/` directory contains integrations with AI services:
+
+- Integrations with various AI services like OpenAI, etc.
+
+### Knowledge Base
+The `knowledge_base/` directory contains the implementation of the knowledge base:
+
+- Implementation of the vector knowledge base using Supabase.
+
+### Web Dashboard
+The `web_dashboard/` directory contains the web interface for interacting with the AI executive team:
+
+- `app.py`: Flask application for the web dashboard.
+- `routes/`: Directory containing route handlers for different sections of the dashboard.
+  - `api.py`: API routes for external access.
+  - `agents.py`: Routes for agent management.
+  - `knowledge_base.py`: Routes for knowledge base management.
+  - `dashboard.py`: Routes for the main dashboard.
+  - `analytics.py`: Routes for analytics.
+  - `auth.py`: Routes for authentication.
+- `static/`: Directory containing static assets.
+  - `css/`: CSS stylesheets.
+  - `js/`: JavaScript files.
+    - `chat.js`: Main chat functionality.
+    - `chat-utils.js`: Utility functions for chat.
+  - `fonts/`: Font files.
+- `templates/`: Directory containing HTML templates.
+  - `base.html`: Base template for all pages.
+  - `chat.html`: Chat interface template.
+  - Various subdirectories for different sections of the dashboard.
+- `forms/`: Directory containing form definitions.
+- `utils/`: Directory containing utility functions.
+
+### Data
+The `data/` directory contains data files for the AI executive team:
+
+- Various data files used by the agents.
+
+### KB Data
+The `kb_data/` directory contains data for the knowledge base:
+
+- `chroma/`: Directory containing Chroma vector store data.
+
+### Documentation
+The `docs/` directory contains documentation for the project:
+
+- `api/`: API documentation.
+- `architecture/`: Architecture documentation.
+- `deployment/`: Deployment documentation.
+- `developer/`: Developer documentation.
+- `user/`: User documentation.
+
+### Configuration
+The `config/` directory contains configuration files:
+
+- Various configuration files for the project.
+
+## Key Components and Their Functionality
+
+### Agent System
+The agent system is built around a base `Agent` class defined in `base_agent.py`. This class provides common functionality for all agents, including:
+- Conversation history management
+- Knowledge base integration
+- Response generation
+- Metrics tracking
+
+Specialized agents extend this base class to provide domain-specific functionality:
+- `DirectorAgent` (CEO): Orchestrates the team and delegates tasks.
+- Technical Support Agent (CTO): Handles technical questions.
+- Finance Agent (CFO): Handles financial questions.
+- Marketing Agent (CMO): Handles marketing questions.
+- Customer Service Agent (COO): Handles operational questions.
+
+### Delegation System
+The delegation system allows agents to delegate tasks to each other. It consists of:
+- `DelegationSystem`: Manages the delegation of tasks.
+- `TaskManager`: Tracks the status of delegated tasks.
+- `MessageBus`: Facilitates communication between agents.
+
+The CEO agent uses the delegation system to route messages to the appropriate specialized agent based on the content of the message.
+
+### Knowledge Base
+The knowledge base stores and retrieves information for the agents. It uses Supabase for vector storage and includes:
+- `VectorKnowledgeBase`: Main class for the knowledge base.
+- `Document`: Class representing a document in the knowledge base.
+- `DocumentProcessor`: Class for processing documents for the knowledge base.
+
+The knowledge base supports:
+- Adding documents
+- Searching for relevant information
+- Deleting documents
+- Listing all documents
+
+### Web Dashboard
+The web dashboard provides a user interface for interacting with the AI executive team. It includes:
+- Chat interface for communicating with agents
+- Knowledge base management
+- Agent management
+- Analytics
+- Settings
+
+The dashboard is built with Flask and uses Bootstrap for the frontend.
+
+## Current Issues and Limitations
+
+1. **Knowledge Base Integration**: The knowledge base integration is not working correctly. The frontend sends the `use_kb` parameter, but it's not clear how this is handled in the backend.
+
+2. **Delegation System**: The delegation system has issues with the CEO agent trying to answer everything instead of properly delegating to specialized agents.
+
+3. **Chat API Endpoint**: The implementation of the `/chat/api/send` endpoint is not clearly defined in the codebase.
+
+4. **Mock Implementations**: Many components have mock implementations, suggesting the system is still in development.
+
+5. **Unused Files**: Several files in the project don't seem to have a clear purpose or aren't being used.
+
+## Recommendations for Improvement
+
+1. **Fix Knowledge Base Integration**: Ensure the knowledge base is properly integrated with the agents and that the `use_kb` parameter is correctly handled.
+
+2. **Improve Delegation Logic**: Adjust the delegation logic in the `DirectorAgent` to make it more likely to delegate to specialized agents.
+
+3. **Clarify API Endpoints**: Clearly define and document all API endpoints, especially the chat API.
+
+4. **Replace Mock Implementations**: Replace mock implementations with real ones as development progresses.
+
+5. **Clean Up Unused Files**: Remove or repurpose files that don't have a clear use.
+
+6. **Improve Documentation**: Add more comprehensive documentation for all components.
+
+7. **Add Tests**: Add unit and integration tests to ensure the system works as expected.
+
+## Conclusion
+The AI Executive Team is a complex multi-agent system with a web dashboard for interaction. While it has a solid foundation, there are several issues that need to be addressed to make it fully functional. This manual provides an overview of the system's structure and functionality to help with further development and troubleshooting.
